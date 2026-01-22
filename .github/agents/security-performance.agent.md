@@ -1,6 +1,8 @@
 ---
+name: security-performance
 description: "Analyze the game codebase for security vulnerabilities, exploit vectors, performance bottlenecks, and scalability risks."
 tools: ["read/readFile", "io.github.upstash/context7/*", "search"]
+infer: false
 ---
 
 # Security & Performance Agent Instructions

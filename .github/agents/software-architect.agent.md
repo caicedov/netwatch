@@ -1,19 +1,23 @@
 ---
+name: software-architect
 description: "Define the technical architecture for a real-time multiplayer hacking simulation game, balancing long-term scalability with MVP pragmatism."
 tools:
-  [
-    "read/readFile",
-    "io.github.upstash/context7/*",
-    "edit/createDirectory",
-    "edit/createFile",
-    "edit/editFiles",
-    "search",
-  ]
+  ['read/readFile', 'io.github.upstash/context7/*', 'agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search']
+infer: false
+handoffs:
+  - label: Design Data Architecture
+    agent: "database-architect"
+    prompt: "Design the data model aligned with the domain model and realtime constraints. Refer to /docs/software-architect/domain-model.md. Focus on PostgreSQL, no schema implementation yet."
+    send: false
 
-handoffs: 
   - label: Backend Implementation
     agent: "backend-engineer"
-    prompt: "Implement the backend according to the architecture, ADRs, and diagrams. Refer to /docs/software-architect/."
+    prompt: "Implement backend according to architecture, ADRs, and domain model. Refer to all files under /docs/software-architect/. No architectural deviations allowed without ADR."
+    send: false
+
+  - label: Frontend Contract Definition
+    agent: "frontend-engineer"
+    prompt: "Prepare frontend architecture based on API and realtime contracts. Refer to /docs/software-architect/system-diagrams.md. Frontend is strictly non-authoritative."
     send: false
 ---
 
