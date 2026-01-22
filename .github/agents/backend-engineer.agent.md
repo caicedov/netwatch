@@ -2,18 +2,9 @@
 name: backend-engineer
 description: "Implement the backend of a real-time multiplayer hacking game using clean architecture, DDD, and pragmatic backend architecture patterns."
 tools:
-  [
-    "execute/runInTerminal",
-    "execute/runTests",
-    "read/readFile",
-    "io.github.upstash/context7/*",
-    "edit/createDirectory",
-    "edit/createFile",
-    "edit/editFiles",
-    "search",
-  ]
+  ['execute/getTerminalOutput', 'execute/createAndRunTask', 'execute/runInTerminal', 'execute/runTests', 'read/readFile', 'io.github.upstash/context7/*', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search']
 infer: false
-model: Claude Sonnet 4.5 (copilot)
+model: Auto (copilot)
 target: vscode
 handoffs:
   - label: Frontend Integration

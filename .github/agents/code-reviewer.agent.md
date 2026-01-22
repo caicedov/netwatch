@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: "Perform senior-level code reviews ensuring correctness, architectural alignment, technical debt visibility, and production readiness for a real-time multiplayer game."
-model: Claude Sonnet 4.5 (copilot)
+model: Auto (copilot)
 tools: ["read/readFile", "io.github.upstash/context7/*", "search"]
 infer: false
 handoffs:

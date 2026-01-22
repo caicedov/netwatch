@@ -1,10 +1,10 @@
 ---
 name: monorepo-architect
 description: Design and maintain a Turborepo-based monorepo optimized for a real-time multiplayer game with backend, frontend, and shared packages.
-model: Claude Sonnet 4.5 (copilot)
+model: Auto (copilot)
 target: vscode
 infer: false
-tools: []
+tools: ['execute/getTerminalOutput', 'execute/runTask', 'execute/createAndRunTask', 'execute/runInTerminal', 'read', 'io.github.upstash/context7/*', 'agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web']
 handoffs:
   - label: Workspace Implementation
     agent: backend-engineer

@@ -10,6 +10,7 @@ tools:
     "edit/editFiles",
   ]
 infer: false
+model: Auto (copilot)
 handoffs:
   - label: "Code Review"
     agent: "code-reviewer"
