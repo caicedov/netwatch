@@ -2,14 +2,7 @@
 name: product-owner
 description: "Act as a Product Owner for a real-time multiplayer hacking simulation game. Translate vision into MVP-scoped, testable product requirements with clear functional boundaries and assumptions."
 tools:
-  [
-    "read/readFile",
-    "io.github.upstash/context7/*",
-    "edit/createDirectory",
-    "edit/createFile",
-    "edit/editFiles",
-    "search",
-  ]
+  ['read/readFile', 'io.github.upstash/context7/*', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web']
 infer: false
 handoffs:
   - label: Architecture Definition
