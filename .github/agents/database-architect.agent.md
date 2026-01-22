@@ -2,7 +2,7 @@
 name: database-architect
 description: "Design the data layer for a real-time multiplayer hacking game using PostgreSQL, focusing on correctness, simplicity, and long-term evolution."
 model: Claude Sonnet 4.5 (copilot)
-tools: ["read/readFile", "io.github.upstash/context7/*", "search"]
+tools: ['read/readFile', 'io.github.upstash/context7/*', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search']
 handoffs: 
   - label: Validate Data Model
     agent: "backend-engineer"
