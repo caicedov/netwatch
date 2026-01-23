@@ -1,0 +1,27 @@
+{
+  "name": "netwatch",
+  "version": "0.1.0",
+  "description": "Real-time multiplayer hacking game",
+  "private": true,
+  "packageManager": "pnpm@8.0.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf .turborepo"
+  },
+  "devDependencies": {
+    "@netwatch/config": "workspace:*",
+    "@netwatch/tsconfig": "workspace:*",
+    "turbo": "2.7.5"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

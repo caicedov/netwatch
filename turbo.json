@@ -1,0 +1,67 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "version": "2",
+  "globalDependencies": [
+    "tsconfig.json",
+    ".biomerc.json",
+    "pnpm-workspace.yaml"
+  ],
+  "tasks": {
+    "build": {
+      "description": "Compile TypeScript, generate dist/",
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "cache": true,
+      "hashAlgorithm": "md5",
+      "env": ["NODE_ENV"]
+    },
+    "dev": {
+      "description": "Start dev server (watch mode)",
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV"]
+    },
+    "test": {
+      "description": "Run unit and integration tests",
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "cache": true,
+      "inputs": ["src/**", "test/**", "jest.config.js"]
+    },
+    "test:watch": {
+      "description": "Run tests in watch mode",
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test:e2e": {
+      "description": "Run end-to-end tests (backend only)",
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["NODE_ENV", "DATABASE_URL", "JWT_SECRET"]
+    },
+    "lint": {
+      "description": "Lint and format check with Biome",
+      "cache": true,
+      "inputs": ["src/**", ".biomerc.json"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "description": "Fix linting issues automatically",
+      "cache": false,
+      "inputs": ["src/**", ".biomerc.json"]
+    },
+    "type-check": {
+      "description": "Run TypeScript type checking without emit",
+      "dependsOn": ["^build"],
+      "cache": true,
+      "outputs": []
+    },
+    "clean": {
+      "description": "Remove dist/, coverage/, node_modules/.turborepo",
+      "cache": false
+    }
+  },
+  "ui": "tui",
+  "outputLogs": "new-only"
+}
