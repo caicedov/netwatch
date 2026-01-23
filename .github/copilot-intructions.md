@@ -1,5 +1,7 @@
 # Copilot Instructions (Repository)
 
+- USE ALWAYS ENGLISH.
+
 ## Git commits
 
 - Always suggest commit messages using conventional commits.

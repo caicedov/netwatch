@@ -4,8 +4,7 @@
   "private": true,
   "description": "Base TypeScript configurations",
   "license": "MIT",
-  "files": [
-    "base.json",
-    "react.json"
-  ]
+  "publishConfig": {
+    "access": "public"
+  }
 }

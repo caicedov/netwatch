@@ -1,18 +1,16 @@
 {
-  "extends": "@netwatch/tsconfig/react.json",
+  "extends": "@netwatch/tsconfig/nextjs.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
-    },
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-        {
-            "name": "next"
-        }
-    ]
+    "plugins": [{ "name": "next" }]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "out", "build"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
