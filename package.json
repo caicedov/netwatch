@@ -17,7 +17,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.11",
-    "@netwatch/config": "workspace:*",
     "@netwatch/tsconfig": "workspace:*",
     "turbo": "2.7.5"
   },
