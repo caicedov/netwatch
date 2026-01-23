@@ -18,5 +18,38 @@
  * - Domain Events
  */
 
-// Re-export public API (barrel exports)
-export {};
+// Entities
+export { User } from './entities/user.entity';
+export {
+    Player,
+    type PlayerId,
+    createPlayerId,
+} from './entities/player.entity';
+export {
+    Computer,
+    type ComputerId,
+    createComputerId,
+} from './entities/computer.entity';
+export {
+    Defense,
+    DefenseType,
+    type DefenseId,
+    createDefenseId,
+} from './entities/defense.entity';
+export {
+    HackOperation,
+    HackStatus,
+    HackType,
+    type HackOperationId,
+    createHackOperationId,
+} from './entities/hack-operation.entity';
+export {
+    ProgressionUnlock,
+    UnlockType,
+    type ProgressionUnlockId,
+    createProgressionUnlockId,
+} from './entities/progression-unlock.entity';
+
+// Value Objects
+export { Money } from './value-objects/money';
+export { Energy } from './value-objects/energy';
