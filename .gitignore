@@ -141,3 +141,6 @@ vite.config.ts.timestamp-*
 # Private prompts
 
 /prompts
+
+# Turbo cache
+.turbo/
