@@ -5,7 +5,7 @@
  * All game logic, real-time events, and persistence.
  */
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -20,6 +20,15 @@ async function bootstrap() {
 
     // Global prefix for all routes
     app.setGlobalPrefix('api');
+
+    // Global validation pipe for DTOs
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true, // Strip unknown properties
+        forbidNonWhitelisted: true, // Reject unknown properties
+        transform: true, // Auto-transform payloads
+      }),
+    );
 
     // CORS configuration
     app.enableCors({
