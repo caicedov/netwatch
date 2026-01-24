@@ -2,7 +2,7 @@
 name: code-reviewer
 description: "Perform senior-level code reviews ensuring correctness, architectural alignment, technical debt visibility, and production readiness for a real-time multiplayer game."
 model: Auto (copilot)
-tools: ['read/readFile', 'io.github.upstash/context7/*', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search']
+tools: ['execute/createAndRunTask', 'read/readFile', 'io.github.upstash/context7/*', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search']
 infer: false
 handoffs:
   - label: "Security and Performance Review"

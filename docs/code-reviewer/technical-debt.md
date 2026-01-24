@@ -1,103 +1,477 @@
 # Technical Debt Inventory
 
-**Date**: 2025-01-01  
+**Date**: 2026-01-24  
 **Project**: Netwatch Backend  
-**Classification**: Architectural gaps, missing implementations, compliance violations  
-**Risk Level**: CRITICAL (blocks game functionality)
+**Classification**: API contract gaps, missing real-time layer, incomplete persistence integration, testing deficiency  
+**Risk Level**: CRITICAL (blocks production readiness)
 
 ---
 
 ## Overview
 
-This document catalogs explicit technical debt items identified in the code review. Each item includes:
-- **Why it matters**: Business impact and risk
-- **Where it exists**: File locations and architectural layer
-- **Suggested fix**: High-level remediation approach
-- **Effort estimate**: Story points (assuming 1 SP = 4 hours)
-- **Blocking**: What cannot proceed without fixing this
+This document catalogs technical debt identified in the most recent review of the backend implementation. Since [docs/backend-engineer/implementation-status.md](docs/backend-engineer/implementation-status.md) documents completion of Phase 2–5 (services, use-cases, DTOs, controllers, authentication), this review focuses on post-completion alignment with architectural specification and contract compliance.
+
+---
+
+## Key Findings
+
+**Implemented** (per [implementation-status.md](docs/backend-engineer/implementation-status.md)):
+- ✅ 5 services (PasswordService, AuthService, IPAddressService)
+- ✅ 6 use-cases (CreatePlayer, GetPlayerProfile, CreateComputer, InstallDefense, InitiateHack, UnlockProgression)
+- ✅ 14 DTOs with class-validator decorators
+- ✅ 5 controllers (UsersController, PlayersController, ComputersController, HacksController, ProgressionController)
+- ✅ 11 HTTP endpoints implemented
+- ✅ JWT authentication (JwtAuthGuard, JwtStrategy)
+- ✅ Module wiring with proper DI
+- ✅ Global ValidationPipe configuration
+
+**NOT Implemented** (blocking production):
+- ❌ PostgreSQL persistence integration (repositories still stubbed)
+- ❌ WebSocket real-time gateway
+- ❌ Global exception filters and error standardization
+- ❌ Automated tests (unit, integration, E2E)
+- ❌ Structured logging and observability
 
 ---
 
 ## Debt Items (Priority Order)
 
----
-
-## TD-001: Missing HTTP Controllers
+### TD-001: API Contract Divergence
 
 **Severity**: 🔴 CRITICAL  
-**Category**: Architecture / API Layer  
-**Blocking**: All API functionality  
+**Category**: API Layer / Contract Compliance  
+**Blocking**: Client integration, frontend development  
 
-### Description
-Zero `@Controller` decorated classes exist. The system cannot handle HTTP requests from clients. 15 endpoints specified in [api-contracts.md](../backend-engineer/api-contracts.md) are unimplemented.
+#### Description
 
-### Why It Matters
-- **Business**: Game clients cannot register, authenticate, or perform actions
-- **Deadlock**: Services cannot be built until controllers exist to call them
-- **Time-to-market**: Blocks all game functionality
+The implemented REST surface diverges from [docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md) in multiple ways:
 
-### Locations
-Missing files (should exist):
+**URI Mismatches:**
+- Implemented: `POST /hacks/:computerId/start` → Should be: `POST /hacks/:hackId/start` (initiates hack on computer, not hack)
+- Implemented: `POST /computers` → Should be: `POST /players/:playerId/computers` (enforce ownership via URI)
+
+**Missing Endpoints:**
+1. `GET /players/:playerId/computers` — List player's computers
+2. `GET /computers/:computerId` — Get single computer details
+3. `GET /hacks` — List active hacks globally or by filter
+4. `GET /players/:playerId/hacks` — List hacks by player (attacker/defender roles)
+5. `POST /computers/:computerId/defenses/:defenseId/upgrade` — Upgrade defense
+6. `GET /computers/:computerId/defenses` — List defenses on computer
+7. `GET /players/:playerId/unlocks` — List player's progression unlocks
+8. `GET /players/:playerId/unlocks/:unlockKey` — Check unlock status
+
+**DTO Shape Divergences:**
+- Player DTO missing nested `energy: { current: number; max: number }` structure (has flat `energy` + `energyMax`)
+- Computer DTO missing `storage`, `cpu`, `memory` fields
+- Defense DTO missing `effectiveness` field
+- Hack DTO missing `completionAt` field (uses `completedAt` instead)
+
+#### Why It Matters
+
+- **Contract-First Principle**: Specification guarantees client can assume documented shape; divergences break contract
+- **Client Integration**: Frontend must implement workarounds for missing endpoints or non-conforming shapes
+- **Onboarding Cost**: New developers must reverse-engineer actual API vs. reading spec
+- **Correctness**: Missing endpoints (e.g., defense upgrade) leave game mechanics unimplementable
+
+#### Locations
+
 ```
-apps/backend/src/modules/
-├── users/
-│   └── presentation/
-│       └── users.controller.ts
-├── players/
-│   └── presentation/
-│       └── players.controller.ts
-├── computers/
-│   └── presentation/
-│       └── computers.controller.ts
-├── hacks/
-│   └── presentation/
-│       └── hacks.controller.ts
-└── progression/
-    └── presentation/
-        └── progression.controller.ts
+[src/modules/users/presentation/users.controller.ts]()
+[src/modules/players/presentation/players.controller.ts]()
+[src/modules/computers/presentation/computers.controller.ts]()
+[src/modules/hacks/presentation/hacks.controller.ts]()
+[src/modules/progression/presentation/progression.controller.ts]()
+
+[src/modules/players/application/dtos/player.dto.ts]()
+[src/modules/computers/application/dtos/computer.dto.ts]()
+[src/modules/hacks/application/dtos/hack-operation.dto.ts]()
 ```
 
-### What Needs Implementing
-**UsersController** (POST /auth/*, controllers):
-```typescript
-@Controller('auth')
-export class UsersController {
-  @Post('register')
-  async register(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
-    // Delegate to AuthService.register()
-  }
+#### Suggested Fix
 
-  @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<{ accessToken: string; refreshToken: string }> {
-    // Delegate to AuthService.login()
-  }
+1. Audit all endpoints in [api-contracts.md](docs/backend-engineer/api-contracts.md) against implemented routes
+2. Fix URI paths to match contract (enforce `:playerId` path params for player-owned resources)
+3. Add 8 missing endpoints listed above
+4. Align all DTOs to contract shape (add missing fields, rename inconsistent ones)
+5. Add integration tests to verify endpoint existence and response shape compliance
 
-  @Post('refresh')
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
-    // Delegate to AuthService.refreshToken()
-  }
+#### Effort Estimate
+
+- Fix existing endpoints: 4 hours
+- Add 8 missing endpoints: 12 hours (8 × 1.5 hours each)
+- Update DTOs: 4 hours
+- Add tests: 6 hours
+- **Total: 26 hours (6.5 SP)**
+
+#### Related Items
+
+- TD-003: Missing Exception Filters (error responses must also conform to contract)
+- TD-005: No Automated Tests (contract conformance unverified)
+
+---
+
+### TD-002: Missing PostgreSQL Persistence Integration
+
+**Severity**: 🔴 CRITICAL  
+**Category**: Infrastructure / Data Layer  
+**Blocking**: All game state persistence, production readiness  
+
+#### Description
+
+Implementation references `TypeOrmModule` and database schema exists ([src/infrastructure/database/migrations](src/infrastructure/database/migrations)), but repositories are **stubs** with no actual database queries. Game state is **volatile**:
+
+- User registration creates in-memory User object only
+- Player creation transient (lost on app restart)
+- Hack operations not persisted
+- Progression unlocks not saved
+
+This violates the architectural decision for PostgreSQL in [docs/software-architect/technical-adrs.md](docs/software-architect/technical-adrs.md).
+
+#### Why It Matters
+
+- **State Loss**: Game progress vanishes on server restart
+- **Concurrency**: Multiple clients can corrupt state (no database transactions)
+- **Correctness**: Invariants unenforceable across requests (each client sees different state)
+- **Determinism**: Real-time flows depend on authoritative server state; without persistence, state diverges
+
+#### Locations
+
+All repositories:
+```
+[src/modules/users/infrastructure/persistence/user.repository.ts]()
+[src/modules/players/infrastructure/persistence/player.repository.ts]()
+[src/modules/computers/infrastructure/persistence/computer.repository.ts]()
+[src/modules/hacks/infrastructure/persistence/hack-operation.repository.ts]()
+[src/modules/progression/infrastructure/persistence/progression-unlock.repository.ts]()
+```
+
+#### Suggested Fix
+
+1. Implement `TypeOrmRepository` pattern for each aggregate:
+   ```typescript
+   export class UserRepository {
+     async create(user: User): Promise<void> {
+       const entity = UserMapper.toPersistence(user);
+       await this.manager.save(entity);
+     }
+     
+     async findById(id: UUID): Promise<User | null> {
+       const entity = await this.manager.findOne(UserEntity, { where: { id } });
+       return entity ? UserMapper.toDomain(entity) : null;
+     }
+     
+     async update(user: User): Promise<void> {
+       const entity = UserMapper.toPersistence(user);
+       await this.manager.save(entity);
+     }
+     
+     async delete(id: UUID): Promise<void> {
+       await this.manager.delete(UserEntity, { id });
+     }
+   }
+   ```
+
+2. Add transaction wrappers for multi-aggregate operations (CreatePlayer + CreateComputer)
+3. Verify all entities properly mapped via TypeORM
+4. Run migrations against test database to verify schema matches
+5. Add integration tests querying real database
+
+#### Effort Estimate
+
+- Implement 5 repositories: 15 hours (3 hours each)
+- Add transaction support: 4 hours
+- Database integration testing: 6 hours
+- Migration verification: 2 hours
+- **Total: 27 hours (6.75 SP)**
+
+#### Related Items
+
+- TD-006: Missing Global Exception Filters (database errors must be transformed to HTTP errors)
+- TD-005: No Automated Tests (database integration untested)
+
+---
+
+### TD-003: Missing WebSocket Gateway
+
+**Severity**: 🔴 CRITICAL  
+**Category**: Real-Time Layer  
+**Blocking**: Live game mechanics, server-authoritative updates  
+
+#### Description
+
+Architecture ([docs/software-architect/architecture-overview.md](docs/software-architect/architecture-overview.md)) specifies:
+
+> "Bidirectional persistent WebSocket connections. Server broadcasts game state changes in real-time."
+
+Implementation provides zero WebSocket support. Hack progress, resource updates, and player status changes do not push to clients in real-time.
+
+#### Why It Matters
+
+- **Game Experience**: Players cannot see hack progress live (must poll endpoints)
+- **Determinism**: Multiple clients may initiate simultaneous hacks on same target (race condition)
+- **Architecture Violation**: REST-only design contradicts server-authoritative mandate
+
+#### Locations
+
+Missing:
+```
+[src/common/websocket/games.gateway.ts]() — Main gateway
+[src/modules/hacks/application/services/hack.events.ts]() — Event emitters
+[src/modules/players/application/services/player.events.ts]() — Player status events
+```
+
+#### Suggested Fix
+
+1. Create `@WebSocketGateway` for hack and player events
+2. Emit domain events from use-cases after state changes:
+   ```typescript
+   // InitiateHackUseCase
+   const hack = new HackOperation(...);
+   await this.repo.save(hack);
+   this.eventBus.emit(new HackInitiatedEvent(hack.id, hack.attackerId, hack.targetComputerId));
+   ```
+3. Subscribe gateway to domain events and broadcast to connected clients
+4. Implement reconnection logic (send player current state on WebSocket connect)
+5. Add integration tests for WebSocket flows
+
+#### Effort Estimate
+
+- Create gateway: 4 hours
+- Implement event emission: 6 hours
+- Add Socket.IO connection tracking: 3 hours
+- Reconnection logic: 2 hours
+- Testing: 5 hours
+- **Total: 20 hours (5 SP)**
+
+#### Related Items
+
+- TD-002: Missing Persistence (WebSocket broadcasts depend on persisted state)
+- TD-005: No Automated Tests (real-time flows untested)
+
+---
+
+### TD-004: Missing Global Exception Filters
+
+**Severity**: 🟡 MAJOR  
+**Category**: Error Handling / Presentation  
+**Blocking**: Consistent error responses, frontend error handling  
+
+#### Description
+
+No `@Catch` exception filters exist. Unhandled errors from domain or infrastructure surface as raw exceptions to clients. API contract ([docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md)) specifies consistent error envelope:
+
+```json
+{
+  "statusCode": 400 | 401 | 403 | 404 | 409 | 500,
+  "message": "string",
+  "error": "INVALID_INPUT" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "INTERNAL_ERROR",
+  "timestamp": "ISO8601"
 }
 ```
 
-**PlayersController** (POST /players, GET /players/:id):
-```typescript
-@Controller('players')
-export class PlayersController {
-  @Post()
-  async createPlayer(@Body() createPlayerDto: CreatePlayerDto): Promise<PlayerDto> {
-    // Delegate to CreatePlayerUseCase
-  }
+#### Why It Matters
 
-  @Get(':playerId')
-  async getPlayer(@Param('playerId') playerId: string): Promise<PlayerDto> {
-    // Delegate to GetPlayerProfileUseCase
-  }
+- **Client Integration**: Frontend cannot reliably parse errors (stacktraces vs. error envelopes)
+- **Security**: Stack traces leak internal structure to clients
+- **UX**: No business-friendly error messages (technical exceptions verbatim)
 
-  @Post(':playerId/computers')
-  async createComputer(
-    @Param('playerId') playerId: string,
-    @Body() createComputerDto: CreateComputerDto,
-  ): Promise<ComputerDto> {
+#### Locations
+
+Missing:
+```
+[src/common/filters/http-exception.filter.ts]()
+[src/common/filters/domain-error.filter.ts]()
+[src/common/filters/validation-error.filter.ts]()
+```
+
+#### Suggested Fix
+
+1. Create exception filters:
+   ```typescript
+   @Catch(HttpException)
+   export class HttpExceptionFilter implements ExceptionFilter {
+     catch(exception: HttpException, host: ArgumentsHost) {
+       const ctx = host.switchToHttp();
+       const response = ctx.getResponse();
+       const status = exception.getStatus();
+       response.status(status).json({
+         statusCode: status,
+         message: exception.getResponse(),
+         error: this.mapToErrorCode(status),
+         timestamp: new Date().toISOString(),
+       });
+     }
+   }
+   
+   @Catch()
+   export class AllExceptionsFilter implements ExceptionFilter {
+     catch(exception: unknown, host: ArgumentsHost) {
+       // Map domain/unknown errors to 400/403/409 with business-friendly messages
+     }
+   }
+   ```
+2. Register globally in `main.ts`
+3. Add tests for error envelope conformance
+
+#### Effort Estimate
+
+- Create filters: 4 hours
+- Error code mapping: 2 hours
+- Testing: 3 hours
+- **Total: 9 hours (2.25 SP)**
+
+#### Related Items
+
+- TD-001: API Contract Divergence (error responses must conform)
+- TD-005: No Automated Tests (error behavior untested)
+
+---
+
+### TD-005: No Automated Tests
+
+**Severity**: 🟡 MAJOR  
+**Category**: Quality Assurance  
+**Blocking**: Regression detection, confidence in refactoring  
+
+#### Description
+
+Zero test coverage. No unit, integration, or E2E tests exist despite critical business logic:
+- Auth flows (registration, login, password verification)
+- Game invariants (energy bounds, level computation, resource limits)
+- Authorization checks (self-hack prevention, ownership verification)
+- API contract conformance
+
+#### Why It Matters
+
+- **Regression Risk**: Refactoring services risks breaking hidden flows
+- **Bug Detection**: Invariant violations undetected (e.g., negative money)
+- **Confidence**: Cannot safely modify authentication or hack logic
+- **Documentation**: Tests serve as executable spec for complex flows
+
+#### Locations
+
+Missing test suites:
+```
+[src/modules/users/application/services/__tests__/auth.service.spec.ts]()
+[src/modules/players/application/usecases/__tests__/create-player.spec.ts]()
+[src/modules/hacks/application/usecases/__tests__/initiate-hack.spec.ts]()
+[apps/backend/src/__tests__/users.controller.e2e-spec.ts]()
+[apps/backend/src/__tests__/players.controller.e2e-spec.ts]()
+```
+
+#### Suggested Fix
+
+1. Unit tests for services (3 files, ~20 tests):
+   - AuthService: registration, login, password verification, token refresh
+   - PasswordService: hashing, verification
+   - IPAddressService: uniqueness, determinism
+
+2. Use-case tests (6 files, ~40 tests):
+   - CreatePlayer: success, duplicate prevention, user validation
+   - InitiateHack: self-hack prevention, attacker/target validation
+   - InstallDefense: ownership check, duplicate prevention, resource deduction
+
+3. E2E tests (5 files, ~30 tests):
+   - Register → Login → Create Player → Create Computer → Install Defense → Initiate Hack flow
+   - Error cases: invalid input, unauthorized, not found, conflict
+   - State isolation: Player A cannot see Player B's computers
+
+4. Use Jest (NestJS default):
+   ```bash
+   npm run test
+   npm run test:e2e
+   npm run test:cov
+   ```
+
+#### Effort Estimate
+
+- Unit tests: 15 hours (3 files × 5 hours)
+- Use-case tests: 20 hours (6 files × 3.33 hours)
+- E2E tests: 18 hours (5 files × 3.6 hours)
+- Test infrastructure (mocks, fixtures): 5 hours
+- **Total: 58 hours (14.5 SP)**
+
+#### Related Items
+
+- TD-001: API Contract Divergence (tests verify contract compliance)
+- TD-002: Missing Persistence (tests require database integration)
+- All other debt items (tests catch regressions)
+
+---
+
+### TD-006: No Structured Logging
+
+**Severity**: 🟢 MINOR  
+**Category**: Observability  
+**Blocking**: Production debugging, audit trail  
+
+#### Description
+
+No structured logging. NestJS default logger (console) provides minimal context. Cannot trace:
+- Request flow (which endpoints, by whom, timing)
+- Business events (hack initiated, completed, defenses installed)
+- Errors (which operation failed, why)
+- Security events (failed logins, unauthorized access)
+
+#### Why It Matters
+
+- **Production Debugging**: No visibility into failure modes
+- **Audit Trail**: Cannot answer "who attacked whom and when"
+- **Performance**: Slow operations invisible (no timing instrumentation)
+
+#### Locations
+
+Missing:
+```
+[src/common/logging/logger.service.ts]()
+[src/common/logging/logging.interceptor.ts]()
+```
+
+#### Suggested Fix
+
+1. Install Winston or Pino:
+   ```bash
+   npm install winston
+   ```
+
+2. Create logger service with structured JSON output
+3. Add logging interceptor to capture all requests/responses
+4. Emit structured logs from use-cases:
+   ```typescript
+   this.logger.info('hack_initiated', {
+     hackId: hack.id,
+     attackerId: hack.attackerId,
+     targetComputerId: hack.targetComputerId,
+     hackType: hack.hackType,
+     timestamp: new Date(),
+   });
+   ```
+
+#### Effort Estimate
+
+- Logger setup: 3 hours
+- Interceptor: 2 hours
+- Add logging to services/use-cases: 5 hours
+- **Total: 10 hours (2.5 SP)**
+
+---
+
+## Summary by Priority
+
+| Priority | Items | Total Effort | Blocking |
+|----------|-------|--------------|----------|
+| CRITICAL | TD-001, TD-002, TD-003 | 73 hours | Production readiness |
+| MAJOR | TD-004, TD-005 | 67 hours | Stability, confidence |
+| MINOR | TD-006 | 10 hours | Operations |
+| **TOTAL** | **6 items** | **150 hours (37.5 SP)** | — |
+
+Assuming 8-hour dev days: **19 developer-days** or **4 developer-weeks** to production readiness.
+
+---
+
+**Review Date**: 2026-01-24  
+**Reviewer**: Code Review Agent (Strict Mode)
+
     // Delegate to CreateComputerUseCase
   }
 }
