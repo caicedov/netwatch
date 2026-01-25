@@ -68,7 +68,7 @@ This checklist helps verify that the monorepo structure is properly implemented 
 - [ ] `docs/monorepo-architect/structure.md` exists
 - [ ] `docs/monorepo-architect/turborepo-pipelines.md` exists
 - [ ] `docs/monorepo-architect/conventions.md` exists
-- [ ] `docs/monorepo-architect/README.md` exists (quick start)
+- [ ] `docs/INDEX.md` exists (canonical table of contents)
 - [ ] `docs/monorepo-architect/SUMMARY.md` exists (one-page overview)
 
 ---
@@ -364,7 +364,7 @@ In `packages/*/src/**/*.ts`:
 ## Phase 10: Documentation
 
 - [ ] All documents exist:
-  - [ ] `docs/monorepo-architect/README.md` (quick start)
+  - [ ] `docs/INDEX.md` (canonical table of contents)
   - [ ] `docs/monorepo-architect/structure.md` (folder layout, persistence rules)
   - [ ] `docs/monorepo-architect/turborepo-pipelines.md` (tasks, caching)
   - [ ] `docs/monorepo-architect/conventions.md` (naming, imports, database rules)

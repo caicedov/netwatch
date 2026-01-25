@@ -215,7 +215,7 @@ packages/contracts/src/
 
 ## Getting Help
 
-1. **Can't find something?** → Check [docs/monorepo-architect/INDEX.md](docs/monorepo-architect/INDEX.md)
+1. **Can't find something?** → Check [docs/INDEX.md](docs/INDEX.md)
 2. **Need a visual?** → Read [docs/monorepo-architect/DIAGRAMS.md](docs/monorepo-architect/DIAGRAMS.md)
 3. **Implementing a feature?** → Reference [docs/monorepo-architect/CHECKLIST.md](docs/monorepo-architect/CHECKLIST.md)
 4. **Quick reference?** → See [docs/monorepo-architect/SUMMARY.md](docs/monorepo-architect/SUMMARY.md)

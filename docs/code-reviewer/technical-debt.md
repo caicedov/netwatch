@@ -9,13 +9,13 @@
 
 ## Overview
 
-This document catalogs technical debt identified in the most recent review of the backend implementation. Since [docs/backend-engineer/implementation-status.md](docs/backend-engineer/implementation-status.md) documents completion of Phase 2–5 (services, use-cases, DTOs, controllers, authentication), this review focuses on post-completion alignment with architectural specification and contract compliance.
+This document catalogs technical debt identified in the most recent review of the backend implementation. Since [docs/code-reviewer/COMPLETION-STATUS.md](docs/code-reviewer/COMPLETION-STATUS.md) summarizes completion for Phases 2–5 (services, use-cases, DTOs, controllers, authentication), this review focuses on post-completion alignment with architectural specification and contract compliance.
 
 ---
 
 ## Key Findings
 
-**Implemented** (per [implementation-status.md](docs/backend-engineer/implementation-status.md)):
+**Implemented** (per [code-reviewer/COMPLETION-STATUS.md](docs/code-reviewer/COMPLETION-STATUS.md)):
 - ✅ 5 services (PasswordService, AuthService, IPAddressService)
 - ✅ 6 use-cases (CreatePlayer, GetPlayerProfile, CreateComputer, InstallDefense, InitiateHack, UnlockProgression)
 - ✅ 14 DTOs with class-validator decorators

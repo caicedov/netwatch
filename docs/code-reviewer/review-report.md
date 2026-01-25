@@ -2,13 +2,13 @@
 
 **Date:** 2026-01-24  
 **Scope:** Application layer (services, use-cases, DTOs, controllers), auth infrastructure, module wiring  
-**Reviewed Against:** [docs/software-architect/architecture-overview.md](docs/software-architect/architecture-overview.md), [docs/software-architect/domain-model.md](docs/software-architect/domain-model.md), [docs/software-architect/technical-adrs.md](docs/software-architect/technical-adrs.md), [docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md), [docs/backend-engineer/implementation-status.md](docs/backend-engineer/implementation-status.md)
+**Reviewed Against:** [docs/software-architect/architecture-overview.md](docs/software-architect/architecture-overview.md), [docs/software-architect/domain-model.md](docs/software-architect/domain-model.md), [docs/software-architect/technical-adrs.md](docs/software-architect/technical-adrs.md), [docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md), [docs/code-reviewer/COMPLETION-STATUS.md](docs/code-reviewer/COMPLETION-STATUS.md)
 
 ---
 
 ## Executive Summary
 
-- ✅ Application layer now exists (services, DTOs, controllers) with JWT guards and ValidationPipe configured; 11 HTTP endpoints implemented per [docs/backend-engineer/implementation-status.md](docs/backend-engineer/implementation-status.md).
+- ✅ Application layer now exists (services, DTOs, controllers) with JWT guards and ValidationPipe configured; 11 HTTP endpoints implemented per [docs/code-reviewer/COMPLETION-STATUS.md](docs/code-reviewer/COMPLETION-STATUS.md).
 - 🔴 Contract coverage is incomplete: several required endpoints and response shapes in [docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md) remain unimplemented or diverge (computers, hacks, defenses, unlock queries).
 - 🔴 Persistence is still stubbed; no durable storage despite architectural requirement for PostgreSQL in [docs/software-architect/technical-adrs.md](docs/software-architect/technical-adrs.md), risking data loss and non-deterministic state.
 - 🟡 Real-time WebSocket gateway is absent even though the architecture mandates server-pushed state ([docs/software-architect/architecture-overview.md](docs/software-architect/architecture-overview.md)).
@@ -32,7 +32,7 @@
   Real-time push is a core architectural principle ([docs/software-architect/architecture-overview.md](docs/software-architect/architecture-overview.md)), yet no `@WebSocketGateway` exists. Hack initiation currently triggers no server-driven updates to attackers/defenders, undermining real-time determinism and reconnection consistency.
 
 - **Missing global error handling**  
-  Custom exception filters/interceptors are absent (acknowledged in [docs/backend-engineer/implementation-status.md](docs/backend-engineer/implementation-status.md)). Without standardized error mapping, validation and domain errors will surface as framework defaults, yielding inconsistent `statusCode/message/error` shapes promised in [docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md).
+  Custom exception filters/interceptors are absent (acknowledged in [docs/code-reviewer/COMPLETION-STATUS.md](docs/code-reviewer/COMPLETION-STATUS.md)). Without standardized error mapping, validation and domain errors will surface as framework defaults, yielding inconsistent `statusCode/message/error` shapes promised in [docs/backend-engineer/api-contracts.md](docs/backend-engineer/api-contracts.md).
 
 - **No automated tests**  
   There is still no unit or integration coverage. Given the new application layer, guards, and DTO validation, absence of tests leaves regressions undetected—particularly around auth, ownership checks, and hack invariants.
@@ -40,7 +40,7 @@
 ### 🟢 Minor
 
 - **Response shape gaps vs contract**  
-  DTOs summarized in [docs/backend-engineer/implementation-status.md](docs/backend-engineer/implementation-status.md) omit several contract fields (e.g., computer `storage/cpu/memory`, player `energy.current/max`, defense `effectiveness`, hack `completionAt` naming). These mismatches will force client-side conditionals or break typed clients.
+  DTOs summarized in [docs/code-reviewer/COMPLETION-STATUS.md](docs/code-reviewer/COMPLETION-STATUS.md) omit several contract fields (e.g., computer `storage/cpu/memory`, player `energy.current/max`, defense `effectiveness`, hack `completionAt` naming). These mismatches will force client-side conditionals or break typed clients.
 
 ---
 
