@@ -8,5 +8,5 @@ export class DefenseDto {
   computerId!: string;
   type!: string;
   level!: number;
-  createdAt!: Date;
+  effectiveness!: number; // Added to match contract
 }

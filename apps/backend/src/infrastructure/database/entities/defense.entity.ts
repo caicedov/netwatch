@@ -52,8 +52,17 @@ export class DefenseEntity {
   })
   level!: number;
 
+  @Column({
+    type: 'numeric',
+    precision: 5,
+    scale: 2,
+    default: 1.0,
+  })
+  effectiveness!: number; // Added to match contract
+
   @CreateDateColumn({
     type: 'timestamptz',
   })
   installed_at!: Date;
 }
+

@@ -21,8 +21,8 @@ import { HackOperation } from '@netwatch/domain';
  * Hacks Controller
  *
  * Handles hack operation endpoints:
- * - GET /hacks (list hacks)
- * - POST /hacks/:id/start (initiate hack)
+ * - GET /hacks (list hacks globally)
+ * - POST /hacks (initiate hack - moved to accept targetComputerId in body)
  * - GET /hacks/:id (retrieve hack)
  *
  * All endpoints require JWT authentication.
@@ -65,16 +65,16 @@ export class HacksController {
   /**
    * Initiate hack against target computer.
    *
-   * @param id - Target computer ID from URL
-   * @param initiateHackDto - Hack payload (hackType, tools)
+   * Fixed endpoint: POST /hacks (body contains targetComputerId)
+   *
+   * @param initiateHackDto - Hack payload (targetComputerId, hackType, tools)
    * @param request - Express request with user from JWT
    * @returns HackOperationDto with hack status and estimated duration
    */
-  @Post(':id/start')
-  @HttpCode(HttpStatus.ACCEPTED) // 202 Accepted (async operation)
+  @Post()
+  @HttpCode(HttpStatus.CREATED) // 201 Created for new hack operation
   @UsePipes(ValidationPipe)
   async initiateHack(
-    @Param('id') id: string,
     @Body() initiateHackDto: InitiateHackDto,
     @Request() request: any,
   ): Promise<HackOperationDto> {
@@ -82,7 +82,7 @@ export class HacksController {
 
     const hack = await this.initiateHackUseCase.execute(
       attackerId,
-      id,
+      initiateHackDto.targetComputerId, // Now from body
       initiateHackDto.hackType as any,
       initiateHackDto.tools,
     );
@@ -103,8 +103,8 @@ export class HacksController {
       toolsUsed: hack.getToolsUsed(),
       estimatedDuration: hack.getEstimatedDuration(),
       startedAt: hack.getStartedAt(),
-      completedAt: hack.getCompletionAt(),
-      resultData: hack.getResultData(),
+      completionAt: hack.getCompletionAt(),
     };
   }
 }
+

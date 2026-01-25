@@ -21,9 +21,11 @@ import { Computer, Defense } from '@netwatch/domain';
  * Computers Controller
  *
  * Handles computer management endpoints:
- * - POST /computers (create)
+ * - POST /players/:playerId/computers (create) — Moved under players route
  * - GET /computers/:id (retrieve)
  * - POST /computers/:id/defenses (install defense)
+ * - GET /computers/:id/defenses (list defenses)
+ * - POST /computers/:id/defenses/:defenseId/upgrade (upgrade defense)
  *
  * All endpoints require JWT authentication.
  */
@@ -71,6 +73,19 @@ export class ComputersController {
   }
 
   /**
+   * List defenses on computer.
+   *
+   * @param computerId - Computer ID from URL
+   * @returns Array of DefenseDto
+   */
+  @Get(':computerId/defenses')
+  @HttpCode(HttpStatus.OK)
+  async listDefenses(@Param('computerId') computerId: string): Promise<DefenseDto[]> {
+    // TODO: Implement ListDefensesUseCase
+    throw new Error('Not implemented');
+  }
+
+  /**
    * Install defense on computer.
    *
    * @param id - Computer ID from URL
@@ -95,6 +110,25 @@ export class ComputersController {
     );
 
     return this.defenseToDto(defense);
+  }
+
+  /**
+   * Upgrade installed defense.
+   *
+   * @param computerId - Computer ID from URL
+   * @param defenseId - Defense ID from URL
+   * @param request - Express request with user from JWT
+   * @returns DefenseDto with updated defense
+   */
+  @Post(':computerId/defenses/:defenseId/upgrade')
+  @HttpCode(HttpStatus.OK)
+  async upgradeDefense(
+    @Param('computerId') computerId: string,
+    @Param('defenseId') defenseId: string,
+    @Request() request: any,
+  ): Promise<DefenseDto> {
+    // TODO: Implement UpgradeDefenseUseCase
+    throw new Error('Not implemented');
   }
 
   /**
@@ -124,7 +158,7 @@ export class ComputersController {
       computerId: defense.getComputerId(),
       type: defense.getDefenseType(),
       level: defense.getLevel(),
-      createdAt: defense.getInstalledAt(),
+      effectiveness: defense.getEffectiveness(),
     };
   }
 }

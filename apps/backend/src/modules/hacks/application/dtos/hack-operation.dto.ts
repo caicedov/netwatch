@@ -12,6 +12,5 @@ export class HackOperationDto {
   toolsUsed!: string[];
   estimatedDuration!: number;
   startedAt!: Date;
-  completedAt!: Date | null;
-  resultData!: Record<string, any>;
+  completionAt!: Date | null; // Renamed from completedAt to match contract
 }

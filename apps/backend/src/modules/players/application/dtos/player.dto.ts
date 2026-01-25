@@ -10,8 +10,10 @@ export class PlayerDto {
   level!: number;
   experience!: number;
   money!: bigint;
-  energy!: number;
-  energyMax!: number;
+  energy!: {
+    current: number;
+    max: number;
+  };
   skillPoints!: number;
   createdAt!: Date;
 }

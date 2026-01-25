@@ -24,6 +24,7 @@ export class DefenseMapper {
       computer_id: defense.getComputerId(),
       defense_type: this.mapDefenseTypeToEnum(defense.getDefenseType()),
       level: defense.getLevel(),
+      effectiveness: defense.getEffectiveness(),
       installed_at: defense.getInstalledAt(),
     };
   }

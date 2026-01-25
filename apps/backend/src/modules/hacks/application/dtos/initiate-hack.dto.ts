@@ -1,4 +1,4 @@
-import { IsEnum, IsArray, IsString } from 'class-validator';
+import { IsEnum, IsArray, IsString, IsUUID } from 'class-validator';
 
 export enum HackTypeEnum {
   BRUTEFORCE = 'bruteforce',
@@ -11,8 +11,12 @@ export enum HackTypeEnum {
  * Initiate Hack DTO
  *
  * Payload for starting a hack operation.
+ * Now includes targetComputerId in body (moved from URL param).
  */
 export class InitiateHackDto {
+  @IsUUID()
+  targetComputerId!: string;
+
   @IsEnum(HackTypeEnum)
   hackType!: HackTypeEnum;
 
