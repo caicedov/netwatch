@@ -1,57 +1,58 @@
 /**
  * Defense Mapper
  *
- * Maps between TypeORM DefenseEntity and domain Defense entity.
+ * Maps between Prisma Defense model and domain Defense entity.
  * Enforces domain invariants during reconstruction.
  */
 import { Defense, createDefenseId, DefenseType } from '@netwatch/domain';
-import { DefenseEntity, DefenseTypeEnum } from '../database/entities/defense.entity';
+import { DefenseType as PrismaDefenseType } from '@prisma/client';
+import type { Defense as PrismaDefense } from '@prisma/client';
 
 export class DefenseMapper {
-  static toDomain(raw: DefenseEntity): Defense {
+  static toDomain(raw: PrismaDefense): Defense {
     return Defense.fromPersistence(
       createDefenseId(raw.id),
-      raw.computer_id,
-      this.mapDefenseType(raw.defense_type),
+      raw.computerId,
+      this.mapDefenseType(raw.defenseType),
       raw.level,
-      raw.installed_at,
+      raw.installedAt,
     );
   }
 
-  static toPersistence(defense: Defense): Partial<DefenseEntity> {
+  static toPersistence(defense: Defense) {
     return {
       id: defense.getId(),
-      computer_id: defense.getComputerId(),
-      defense_type: this.mapDefenseTypeToEnum(defense.getDefenseType()),
+      computerId: defense.getComputerId(),
+      defenseType: this.mapDefenseTypeToEnum(defense.getDefenseType()),
       level: defense.getLevel(),
       effectiveness: defense.getEffectiveness(),
-      installed_at: defense.getInstalledAt(),
+      installedAt: defense.getInstalledAt(),
     };
   }
 
-  private static mapDefenseType(enumValue: DefenseTypeEnum): DefenseType {
+  private static mapDefenseType(enumValue: PrismaDefenseType): DefenseType {
     switch (enumValue) {
-      case DefenseTypeEnum.FIREWALL:
+      case PrismaDefenseType.FIREWALL:
         return DefenseType.FIREWALL;
-      case DefenseTypeEnum.ANTIVIRUS:
+      case PrismaDefenseType.ANTIVIRUS:
         return DefenseType.ANTIVIRUS;
-      case DefenseTypeEnum.HONEYPOT:
+      case PrismaDefenseType.HONEYPOT:
         return DefenseType.HONEYPOT;
-      case DefenseTypeEnum.IDS:
+      case PrismaDefenseType.IDS:
         return DefenseType.IDS;
     }
   }
 
-  private static mapDefenseTypeToEnum(domainType: DefenseType): DefenseTypeEnum {
+  private static mapDefenseTypeToEnum(domainType: DefenseType): PrismaDefenseType {
     switch (domainType) {
       case DefenseType.FIREWALL:
-        return DefenseTypeEnum.FIREWALL;
+        return PrismaDefenseType.FIREWALL;
       case DefenseType.ANTIVIRUS:
-        return DefenseTypeEnum.ANTIVIRUS;
+        return PrismaDefenseType.ANTIVIRUS;
       case DefenseType.HONEYPOT:
-        return DefenseTypeEnum.HONEYPOT;
+        return PrismaDefenseType.HONEYPOT;
       case DefenseType.IDS:
-        return DefenseTypeEnum.IDS;
+        return PrismaDefenseType.IDS;
     }
   }
 }

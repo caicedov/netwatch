@@ -1,7 +1,7 @@
 /**
  * ProgressionUnlock Mapper
  *
- * Maps between TypeORM ProgressionUnlockEntity and domain ProgressionUnlock entity.
+ * Maps between Prisma ProgressionUnlock model and domain ProgressionUnlock entity.
  * Enforces domain invariants during reconstruction.
  */
 import {
@@ -9,55 +9,53 @@ import {
   createProgressionUnlockId,
   UnlockType,
 } from '@netwatch/domain';
-import {
-  ProgressionUnlockEntity,
-  UnlockTypeEnum,
-} from '../database/entities/progression-unlock.entity';
+import { UnlockType as PrismaUnlockType } from '@prisma/client';
+import type { ProgressionUnlock as PrismaProgressionUnlock } from '@prisma/client';
 
 export class ProgressionUnlockMapper {
-  static toDomain(raw: ProgressionUnlockEntity): ProgressionUnlock {
+  static toDomain(raw: PrismaProgressionUnlock): ProgressionUnlock {
     return ProgressionUnlock.fromPersistence(
       createProgressionUnlockId(raw.id),
-      raw.player_id,
-      this.mapUnlockType(raw.unlock_type),
-      raw.unlock_key,
-      raw.unlocked_at,
+      raw.playerId,
+      this.mapUnlockType(raw.unlockType),
+      raw.unlockKey,
+      raw.unlockedAt,
     );
   }
 
-  static toPersistence(unlock: ProgressionUnlock): Partial<ProgressionUnlockEntity> {
+  static toPersistence(unlock: ProgressionUnlock) {
     return {
       id: unlock.getId(),
-      player_id: unlock.getPlayerId(),
-      unlock_type: this.mapUnlockTypeToEnum(unlock.getUnlockType()),
-      unlock_key: unlock.getUnlockKey(),
-      unlocked_at: unlock.getUnlockedAt(),
+      playerId: unlock.getPlayerId(),
+      unlockType: this.mapUnlockTypeToEnum(unlock.getUnlockType()),
+      unlockKey: unlock.getUnlockKey(),
+      unlockedAt: unlock.getUnlockedAt(),
     };
   }
 
-  private static mapUnlockType(enumValue: UnlockTypeEnum): UnlockType {
+  private static mapUnlockType(enumValue: PrismaUnlockType): UnlockType {
     switch (enumValue) {
-      case UnlockTypeEnum.TOOL:
+      case PrismaUnlockType.TOOL:
         return UnlockType.TOOL;
-      case UnlockTypeEnum.DEFENSE:
+      case PrismaUnlockType.DEFENSE:
         return UnlockType.DEFENSE;
-      case UnlockTypeEnum.UPGRADE:
+      case PrismaUnlockType.UPGRADE:
         return UnlockType.UPGRADE;
-      case UnlockTypeEnum.SKILL:
+      case PrismaUnlockType.SKILL:
         return UnlockType.SKILL;
     }
   }
 
-  private static mapUnlockTypeToEnum(domainType: UnlockType): UnlockTypeEnum {
+  private static mapUnlockTypeToEnum(domainType: UnlockType): PrismaUnlockType {
     switch (domainType) {
       case UnlockType.TOOL:
-        return UnlockTypeEnum.TOOL;
+        return PrismaUnlockType.TOOL;
       case UnlockType.DEFENSE:
-        return UnlockTypeEnum.DEFENSE;
+        return PrismaUnlockType.DEFENSE;
       case UnlockType.UPGRADE:
-        return UnlockTypeEnum.UPGRADE;
+        return PrismaUnlockType.UPGRADE;
       case UnlockType.SKILL:
-        return UnlockTypeEnum.SKILL;
+        return PrismaUnlockType.SKILL;
     }
   }
 }

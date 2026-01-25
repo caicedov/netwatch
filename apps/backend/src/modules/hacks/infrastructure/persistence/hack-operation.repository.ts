@@ -5,32 +5,34 @@
  * Private to the hacks module.
  */
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
 import { HackOperation } from '@netwatch/domain';
-import { HackOperationEntity, HackStatusEnum } from '../../../../infrastructure/database/entities/hack-operation.entity';
+import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import { HackOperationMapper } from '../../../../infrastructure/mappers/hack-operation.mapper';
+import { HackStatus } from '@prisma/client';
 
 @Injectable()
 export class HackOperationRepository {
-  private readonly repository: Repository<HackOperationEntity>;
-
-  constructor(private readonly dataSource: DataSource) {
-    this.repository = this.dataSource.getRepository(HackOperationEntity);
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<HackOperation | null> {
-    const raw = await this.repository.findOne({
+    const raw = await this.prisma.hackOperation.findUnique({
       where: { id },
-      relations: ['attacker', 'targetComputer'],
+      include: {
+        attacker: true,
+        targetComputer: true,
+      },
     });
     return raw ? HackOperationMapper.toDomain(raw) : null;
   }
 
   async findByAttackerId(attackerId: string): Promise<HackOperation[]> {
-    const raw = await this.repository.find({
-      where: { attacker_id: attackerId },
-      order: { started_at: 'DESC' },
-      relations: ['attacker', 'targetComputer'],
+    const raw = await this.prisma.hackOperation.findMany({
+      where: { attackerId },
+      orderBy: { startedAt: 'desc' },
+      include: {
+        attacker: true,
+        targetComputer: true,
+      },
     });
     return raw.map((r) => HackOperationMapper.toDomain(r));
   }
@@ -39,75 +41,82 @@ export class HackOperationRepository {
     attackerId: string,
     status: string,
   ): Promise<HackOperation[]> {
-    const raw = await this.repository.find({
+    const raw = await this.prisma.hackOperation.findMany({
       where: {
-        attacker_id: attackerId,
-        status: status as HackStatusEnum,
+        attackerId,
+        status: status as HackStatus,
       },
-      relations: ['attacker', 'targetComputer'],
+      include: {
+        attacker: true,
+        targetComputer: true,
+      },
     });
     return raw.map((r) => HackOperationMapper.toDomain(r));
   }
 
   async findByTargetComputerId(targetComputerId: string): Promise<HackOperation[]> {
-    const raw = await this.repository.find({
-      where: { target_computer_id: targetComputerId },
-      order: { started_at: 'DESC' },
-      relations: ['attacker', 'targetComputer'],
+    const raw = await this.prisma.hackOperation.findMany({
+      where: { targetComputerId },
+      orderBy: { startedAt: 'desc' },
+      include: {
+        attacker: true,
+        targetComputer: true,
+      },
     });
     return raw.map((r) => HackOperationMapper.toDomain(r));
   }
 
   async findPendingCompletions(): Promise<HackOperation[]> {
-    const raw = await this.repository.find({
+    const raw = await this.prisma.hackOperation.findMany({
       where: {
-        status: HackStatusEnum.IN_PROGRESS,
+        status: HackStatus.IN_PROGRESS,
+        completionAt: {
+          lte: new Date(),
+        },
       },
     });
-
-    return raw
-      .filter((r) => r.completion_at <= new Date())
-      .map((r) => HackOperationMapper.toDomain(r));
+    return raw.map((r) => HackOperationMapper.toDomain(r));
   }
 
   async create(operation: HackOperation): Promise<HackOperation> {
-    const raw = await this.repository.save(HackOperationMapper.toPersistence(operation));
+    const raw = await this.prisma.hackOperation.create({
+      data: HackOperationMapper.toPersistence(operation),
+    });
     return HackOperationMapper.toDomain(raw);
   }
 
   async update(operation: HackOperation): Promise<HackOperation> {
-    await this.repository.update(
-      { id: operation.getId() },
-      HackOperationMapper.toPersistence(operation),
-    );
-    const updated = await this.repository.findOne({
+    const raw = await this.prisma.hackOperation.update({
       where: { id: operation.getId() },
-      relations: ['attacker', 'targetComputer'],
+      data: HackOperationMapper.toPersistence(operation),
+      include: {
+        attacker: true,
+        targetComputer: true,
+      },
     });
-    if (!updated) {
-      throw new Error('HackOperation not found after update');
-    }
-    return HackOperationMapper.toDomain(updated);
+    return HackOperationMapper.toDomain(raw);
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.delete({ id });
+    await this.prisma.hackOperation.delete({
+      where: { id },
+    });
   }
 
   async countActiveHacksByAttacker(attackerId: string): Promise<number> {
-    return this.repository.count({
+    return this.prisma.hackOperation.count({
       where: {
-        attacker_id: attackerId,
-        status: HackStatusEnum.IN_PROGRESS,
+        attackerId,
+        status: HackStatus.IN_PROGRESS,
       },
     });
   }
 
   async countActiveHacksOnTarget(targetComputerId: string): Promise<number> {
-    return this.repository.count({
+    return this.prisma.hackOperation.count({
       where: {
-        target_computer_id: targetComputerId,
-        status: HackStatusEnum.IN_PROGRESS,
+        targetComputerId,
+        status: HackStatus.IN_PROGRESS,
       },
     });
   }

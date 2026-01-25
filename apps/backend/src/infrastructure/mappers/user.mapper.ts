@@ -1,34 +1,34 @@
 /**
  * User Mapper
  *
- * Maps between TypeORM UserEntity and domain User entity.
+ * Maps between Prisma User model and domain User entity.
  * Enforces domain invariants during reconstruction.
  */
 import { User } from '@netwatch/domain';
-import { UserEntity } from '../database/entities/user.entity';
+import type { User as PrismaUser } from '@prisma/client';
 
 export class UserMapper {
-  static toDomain(raw: UserEntity): User {
+  static toDomain(raw: PrismaUser): User {
     return User.fromPersistence(
       raw.id,
       raw.username,
-      raw.password_hash,
+      raw.passwordHash,
       raw.email,
-      raw.created_at,
-      raw.last_login_at,
-      raw.is_active,
+      raw.createdAt,
+      raw.lastLoginAt,
+      raw.isActive,
     );
   }
 
-  static toPersistence(user: User): Partial<UserEntity> {
+  static toPersistence(user: User) {
     return {
       id: user.getId(),
       username: user.getUsername(),
-      password_hash: user.getPasswordHash(),
+      passwordHash: user.getPasswordHash(),
       email: user.getEmail(),
-      is_active: user.getIsActive(),
-      created_at: user.getCreatedAt(),
-      last_login_at: user.getLastLoginAt(),
+      isActive: user.getIsActive(),
+      createdAt: user.getCreatedAt(),
+      lastLoginAt: user.getLastLoginAt(),
     };
   }
 }

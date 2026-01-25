@@ -1,40 +1,40 @@
 /**
  * Computer Mapper
  *
- * Maps between TypeORM ComputerEntity and domain Computer entity.
+ * Maps between Prisma Computer model and domain Computer entity.
  * Enforces domain invariants during reconstruction.
  */
 import { Computer, createComputerId } from '@netwatch/domain';
-import { type ComputerEntity } from '../database/entities/computer.entity';
+import type { Computer as PrismaComputer } from '@prisma/client';
 
 export class ComputerMapper {
-  static toDomain(raw: ComputerEntity): Computer {
+  static toDomain(raw: PrismaComputer): Computer {
     return Computer.fromPersistence(
       createComputerId(raw.id),
-      raw.owner_id,
+      raw.ownerId,
       raw.name,
-      raw.ip_address,
-      raw.created_at,
+      raw.ipAddress,
+      raw.createdAt,
       raw.storage,
       raw.cpu,
       raw.memory,
-      raw.is_online,
-      raw.firewall_level,
+      raw.isOnline,
+      raw.firewallLevel,
     );
   }
 
-  static toPersistence(computer: Computer): Partial<ComputerEntity> {
+  static toPersistence(computer: Computer) {
     return {
       id: computer.getId(),
-      owner_id: computer.getOwnerId(),
+      ownerId: computer.getOwnerId(),
       name: computer.getName(),
-      ip_address: computer.getIpAddress(),
+      ipAddress: computer.getIpAddress(),
       storage: computer.getStorage(),
       cpu: computer.getCpu(),
       memory: computer.getMemory(),
-      is_online: computer.getIsOnline(),
-      firewall_level: computer.getFirewallLevel(),
-      created_at: computer.getCreatedAt(),
+      isOnline: computer.getIsOnline(),
+      firewallLevel: computer.getFirewallLevel(),
+      createdAt: computer.getCreatedAt(),
     };
   }
 }

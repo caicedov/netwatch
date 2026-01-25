@@ -1,38 +1,38 @@
 /**
  * Player Mapper
  *
- * Maps between TypeORM PlayerEntity and domain Player entity.
+ * Maps between Prisma Player model and domain Player entity.
  * Enforces domain invariants during reconstruction.
  */
 import { Player, createPlayerId } from '@netwatch/domain';
-import { PlayerEntity } from '../database/entities/player.entity';
+import type { Player as PrismaPlayer } from '@prisma/client';
 
 export class PlayerMapper {
-  static toDomain(raw: PlayerEntity): Player {
+  static toDomain(raw: PrismaPlayer): Player {
     return Player.fromPersistence(
       createPlayerId(raw.id),
-      raw.user_id,
-      raw.display_name,
-      raw.created_at,
+      raw.userId,
+      raw.displayName,
+      raw.createdAt,
       raw.energy,
-      raw.energy_max,
+      raw.energyMax,
       BigInt(raw.money),
       BigInt(raw.experience),
-      raw.skill_points,
+      raw.skillPoints,
     );
   }
 
-  static toPersistence(player: Player): Partial<PlayerEntity> {
+  static toPersistence(player: Player) {
     return {
       id: player.getId(),
-      user_id: player.getUserId(),
-      display_name: player.getDisplayName(),
+      userId: player.getUserId(),
+      displayName: player.getDisplayName(),
       energy: player.getEnergy().getCurrent(),
-      energy_max: player.getEnergy().getMax(),
+      energyMax: player.getEnergy().getMax(),
       money: player.getMoney().toNumber(),
       experience: Number(player.getExperience()),
-      skill_points: player.getSkillPoints(),
-      created_at: player.getCreatedAt(),
+      skillPoints: player.getSkillPoints(),
+      createdAt: player.getCreatedAt(),
     };
   }
 }

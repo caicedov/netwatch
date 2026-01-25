@@ -1,7 +1,7 @@
 /**
  * HackOperation Mapper
  *
- * Maps between TypeORM HackOperationEntity and domain HackOperation entity.
+ * Maps between Prisma HackOperation model and domain HackOperation entity.
  * Enforces domain invariants during reconstruction.
  */
 import {
@@ -11,95 +11,95 @@ import {
   HackType,
 } from '@netwatch/domain';
 import {
-  HackOperationEntity,
-  HackStatusEnum,
-  HackTypeEnum,
-} from '../database/entities/hack-operation.entity';
+  HackStatus as PrismaHackStatus,
+  HackType as PrismaHackType,
+} from '@prisma/client';
+import type { HackOperation as PrismaHackOperation } from '@prisma/client';
 
 export class HackOperationMapper {
-  static toDomain(raw: HackOperationEntity): HackOperation {
+  static toDomain(raw: PrismaHackOperation): HackOperation {
     return HackOperation.fromPersistence(
       createHackOperationId(raw.id),
-      raw.attacker_id,
-      raw.target_computer_id,
+      raw.attackerId,
+      raw.targetComputerId,
       this.mapHackStatus(raw.status),
-      this.mapHackType(raw.hack_type),
-      raw.tools_used,
-      raw.estimated_duration,
-      raw.started_at,
-      raw.completion_at,
-      raw.result_data,
+      this.mapHackType(raw.hackType),
+      raw.toolsUsed as string[],
+      raw.estimatedDuration,
+      raw.startedAt,
+      raw.completionAt,
+      raw.resultData as Record<string, unknown> | null,
     );
   }
 
-  static toPersistence(hackOperation: HackOperation): Partial<HackOperationEntity> {
+  static toPersistence(hackOperation: HackOperation) {
     return {
       id: hackOperation.getId(),
-      attacker_id: hackOperation.getAttackerId(),
-      target_computer_id: hackOperation.getTargetComputerId(),
+      attackerId: hackOperation.getAttackerId(),
+      targetComputerId: hackOperation.getTargetComputerId(),
       status: this.mapHackStatusToEnum(hackOperation.getStatus()),
-      hack_type: this.mapHackTypeToEnum(hackOperation.getHackType()),
-      tools_used: hackOperation.getToolsUsed(),
-      estimated_duration: hackOperation.getEstimatedDuration(),
-      started_at: hackOperation.getStartedAt(),
-      completion_at: hackOperation.getCompletionAt(),
-      result_data: hackOperation.getResultData(),
+      hackType: this.mapHackTypeToEnum(hackOperation.getHackType()),
+      toolsUsed: hackOperation.getToolsUsed(),
+      estimatedDuration: hackOperation.getEstimatedDuration(),
+      startedAt: hackOperation.getStartedAt(),
+      completionAt: hackOperation.getCompletionAt(),
+      resultData: hackOperation.getResultData(),
     };
   }
 
-  private static mapHackStatus(enumValue: HackStatusEnum): HackStatus {
+  private static mapHackStatus(enumValue: PrismaHackStatus): HackStatus {
     switch (enumValue) {
-      case HackStatusEnum.PENDING:
+      case PrismaHackStatus.PENDING:
         return HackStatus.PENDING;
-      case HackStatusEnum.IN_PROGRESS:
+      case PrismaHackStatus.IN_PROGRESS:
         return HackStatus.IN_PROGRESS;
-      case HackStatusEnum.SUCCEEDED:
+      case PrismaHackStatus.SUCCEEDED:
         return HackStatus.SUCCEEDED;
-      case HackStatusEnum.FAILED:
+      case PrismaHackStatus.FAILED:
         return HackStatus.FAILED;
-      case HackStatusEnum.ABORTED:
+      case PrismaHackStatus.ABORTED:
         return HackStatus.ABORTED;
     }
   }
 
-  private static mapHackStatusToEnum(domainStatus: HackStatus): HackStatusEnum {
+  private static mapHackStatusToEnum(domainStatus: HackStatus): PrismaHackStatus {
     switch (domainStatus) {
       case HackStatus.PENDING:
-        return HackStatusEnum.PENDING;
+        return PrismaHackStatus.PENDING;
       case HackStatus.IN_PROGRESS:
-        return HackStatusEnum.IN_PROGRESS;
+        return PrismaHackStatus.IN_PROGRESS;
       case HackStatus.SUCCEEDED:
-        return HackStatusEnum.SUCCEEDED;
+        return PrismaHackStatus.SUCCEEDED;
       case HackStatus.FAILED:
-        return HackStatusEnum.FAILED;
+        return PrismaHackStatus.FAILED;
       case HackStatus.ABORTED:
-        return HackStatusEnum.ABORTED;
+        return PrismaHackStatus.ABORTED;
     }
   }
 
-  private static mapHackType(enumValue: HackTypeEnum): HackType {
+  private static mapHackType(enumValue: PrismaHackType): HackType {
     switch (enumValue) {
-      case HackTypeEnum.STEAL_MONEY:
+      case PrismaHackType.STEAL_MONEY:
         return HackType.STEAL_MONEY;
-      case HackTypeEnum.STEAL_DATA:
+      case PrismaHackType.STEAL_DATA:
         return HackType.STEAL_DATA;
-      case HackTypeEnum.INSTALL_VIRUS:
+      case PrismaHackType.INSTALL_VIRUS:
         return HackType.INSTALL_VIRUS;
-      case HackTypeEnum.DDOS:
+      case PrismaHackType.DDOS:
         return HackType.DDOS;
     }
   }
 
-  private static mapHackTypeToEnum(domainType: HackType): HackTypeEnum {
+  private static mapHackTypeToEnum(domainType: HackType): PrismaHackType {
     switch (domainType) {
       case HackType.STEAL_MONEY:
-        return HackTypeEnum.STEAL_MONEY;
+        return PrismaHackType.STEAL_MONEY;
       case HackType.STEAL_DATA:
-        return HackTypeEnum.STEAL_DATA;
+        return PrismaHackType.STEAL_DATA;
       case HackType.INSTALL_VIRUS:
-        return HackTypeEnum.INSTALL_VIRUS;
+        return PrismaHackType.INSTALL_VIRUS;
       case HackType.DDOS:
-        return HackTypeEnum.DDOS;
+        return PrismaHackType.DDOS;
     }
   }
 }

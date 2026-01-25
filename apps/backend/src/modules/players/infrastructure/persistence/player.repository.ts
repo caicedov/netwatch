@@ -5,74 +5,73 @@
  * Private to the players module.
  */
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
 import { Player } from '@netwatch/domain';
-import { PlayerEntity } from '../../../../infrastructure/database/entities/player.entity';
+import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import { PlayerMapper } from '../../../../infrastructure/mappers/player.mapper';
 
 @Injectable()
 export class PlayerRepository {
-  private readonly repository: Repository<PlayerEntity>;
-
-  constructor(private readonly dataSource: DataSource) {
-    this.repository = this.dataSource.getRepository(PlayerEntity);
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Player | null> {
-    const raw = await this.repository.findOne({
+    const raw = await this.prisma.player.findUnique({
       where: { id },
     });
     return raw ? PlayerMapper.toDomain(raw) : null;
   }
 
   async findByUserId(userId: string): Promise<Player | null> {
-    const raw = await this.repository.findOne({
-      where: { user_id: userId },
+    const raw = await this.prisma.player.findUnique({
+      where: { userId },
     });
     return raw ? PlayerMapper.toDomain(raw) : null;
   }
 
   async create(player: Player): Promise<Player> {
-    const raw = await this.repository.save(PlayerMapper.toPersistence(player));
+    const raw = await this.prisma.player.create({
+      data: PlayerMapper.toPersistence(player),
+    });
     return PlayerMapper.toDomain(raw);
   }
 
   async update(player: Player): Promise<Player> {
-    await this.repository.update({ id: player.getId() }, PlayerMapper.toPersistence(player));
-    const updated = await this.repository.findOne({
+    const raw = await this.prisma.player.update({
       where: { id: player.getId() },
+      data: PlayerMapper.toPersistence(player),
     });
-    if (!updated) {
-      throw new Error('Player not found after update');
-    }
-    return PlayerMapper.toDomain(updated);
+    return PlayerMapper.toDomain(raw);
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.delete({ id });
+    await this.prisma.player.delete({
+      where: { id },
+    });
   }
 
   async existsWithUserId(userId: string): Promise<boolean> {
-    const count = await this.repository.count({
-      where: { user_id: userId },
+    const count = await this.prisma.player.count({
+      where: { userId },
     });
     return count > 0;
   }
 
   async getTopPlayersByLevel(limit: number): Promise<Player[]> {
-    const raw = await this.repository.find({
-      order: { level: 'DESC', experience: 'DESC' },
+    const raw = await this.prisma.player.findMany({
+      orderBy: [{ level: 'desc' }, { experience: 'desc' }],
       take: limit,
     });
     return raw.map((r) => PlayerMapper.toDomain(r));
   }
 
   async getPlayersByExperienceRange(minExp: bigint, maxExp: bigint): Promise<Player[]> {
-    const raw = await this.repository
-      .createQueryBuilder('p')
-      .where('p.experience >= :min', { min: Number(minExp) })
-      .andWhere('p.experience <= :max', { max: Number(maxExp) })
-      .getMany();
+    const raw = await this.prisma.player.findMany({
+      where: {
+        experience: {
+          gte: minExp,
+          lte: maxExp,
+        },
+      },
+    });
     return raw.map((r) => PlayerMapper.toDomain(r));
   }
 }
