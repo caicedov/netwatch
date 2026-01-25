@@ -1,12 +1,3 @@
-# Monorepo Root
+# Archived
 
-This is the root of the NetWatch monorepo. See `/docs/monorepo-architect/` for complete documentation.
-
-## Quick Start
-
-```bash
-pnpm install
-pnpm dev
-```
-
-See [docs/monorepo-architect/START-HERE.md](docs/monorepo-architect/START-HERE.md) for full setup guide.
+This file was superseded by the canonical table of contents in [docs/INDEX.md](docs/INDEX.md). Use the monorepo references there (START-HERE, SUMMARY, structure, conventions) for current guidance.

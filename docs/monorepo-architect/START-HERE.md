@@ -22,14 +22,14 @@ This is a **Turborepo + pnpm monorepo** that manages:
 
 ### 🎯 I'm a... (Start Here)
 
-| Role                     | Read First                                                         | Then Read                                                                                                                                                            |
-| ------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Backend Engineer**     | [Backend Guide (in README.md)](README.md#for-backend-engineer-)    | [structure.md - Persistence Layer](structure.md#persistence-layer-location) + [conventions.md - Database Rules](conventions.md#database-integration-rules)           |
-| **Database Architect**   | [Database Guide (in README.md)](README.md#for-database-architect-) | [structure.md - Example Persistence](structure.md#example-player-module-persistence) + [SUMMARY.md - Database Mapping](SUMMARY.md#database-mapping-quick-reference)  |
-| **Frontend Engineer**    | [Frontend Guide (in README.md)](README.md#for-frontend-engineer-)  | [conventions.md - Component Organization](conventions.md#frontend-component-organization) + [DIAGRAMS.md - Event Flow](DIAGRAMS.md#6-real-time-event-flow-websocket) |
-| **New to Project**       | [README.md](README.md)                                             | [SUMMARY.md](SUMMARY.md) (one-page overview)                                                                                                                         |
-| **Implementing Feature** | [turborepo-pipelines.md](turborepo-pipelines.md)                   | [conventions.md](conventions.md) (naming and structure)                                                                                                              |
-| **Debugging/Verifying**  | [CHECKLIST.md](CHECKLIST.md)                                       | [DIAGRAMS.md](DIAGRAMS.md) (visual references)                                                                                                                       |
+| Role                     | Read First                                                      | Then Read                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Backend Engineer**     | [structure.md - Persistence Layer](structure.md#persistence-layer-location) | [conventions.md - Database Rules](conventions.md#database-integration-rules) + [turborepo-pipelines.md](turborepo-pipelines.md)                                    |
+| **Database Architect**   | [structure.md - Example Persistence](structure.md#example-player-module-persistence) | [SUMMARY.md - Database Mapping](SUMMARY.md#database-mapping-quick-reference) + [conventions.md](conventions.md)                                                     |
+| **Frontend Engineer**    | [conventions.md - Component Organization](conventions.md#frontend-component-organization) | [DIAGRAMS.md - Event Flow](DIAGRAMS.md#6-real-time-event-flow-websocket) + [turborepo-pipelines.md](turborepo-pipelines.md)                                        |
+| **New to Project**       | [SUMMARY.md](SUMMARY.md)                                        | [structure.md](structure.md) (folder layout)                                                                                                                        |
+| **Implementing Feature** | [turborepo-pipelines.md](turborepo-pipelines.md)                | [conventions.md](conventions.md) (naming and structure)                                                                                                             |
+| **Debugging/Verifying**  | [CHECKLIST.md](CHECKLIST.md)                                    | [DIAGRAMS.md](DIAGRAMS.md) (visual references)                                                                                                                      |
 
 ### 📚 All Documents
 

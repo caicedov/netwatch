@@ -207,6 +207,14 @@ The Netwatch backend has reached a critical milestone: **the REST API surface is
 
 ---
 
+## Historical Session Snapshot (2026-01-24)
+- Critical path cleared for client integration; REST API brought to full contract compliance in one session (~2 hours).
+- Repository functionality verified; remaining gap is integration tests and transaction hardening (TD-002).
+- WebSocket gateway still unstarted; implementation guidance lives in [backend-engineer/IMPLEMENTATION-GUIDE.md](../backend-engineer/IMPLEMENTATION-GUIDE.md).
+- Efficiency highlights: 13 files touched, ~150 lines added, TD-001 finished in 4h vs. 26h estimate.
+
+---
+
 ## Architecture Validation
 
 ### ✅ Strengths
