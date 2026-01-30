@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String    @unique @db.VarChar(20)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  email        String?   @unique @db.VarChar(255)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  player       Player?
+
+  @@index([createdAt], map: "idx_users_created")
+  @@map("users")
+}
+
+model Player {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String              @unique(map: "idx_players_user") @map("user_id") @db.Uuid
+  displayName        String              @map("display_name") @db.VarChar(50)
+  energy             Int                 @default(100)
+  energyMax          Int                 @default(100) @map("energy_max")
+  money              BigInt              @default(0)
+  experience         BigInt              @default(0)
+  level              Int?                @default(dbgenerated("(floor(sqrt(((experience)::numeric / 100.0))))::integer"))
+  skillPoints        Int                 @default(0) @map("skill_points")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  computers          Computer[]
+  hackOperations     HackOperation[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  progressionUnlocks ProgressionUnlock[]
+
+  @@index([level], map: "idx_players_level")
+  @@index([createdAt], map: "idx_players_created")
+  @@map("players")
+}
+
+model Computer {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId        String          @map("owner_id") @db.Uuid
+  name           String          @db.VarChar(50)
+  ipAddress      String          @unique @map("ip_address") @db.VarChar(15)
+  storage        Int             @default(1000)
+  cpu            Int             @default(100)
+  memory         Int             @default(512)
+  isOnline       Boolean         @default(true) @map("is_online")
+  firewallLevel  Int             @default(0) @map("firewall_level")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  owner          Player          @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  defenses       Defense[]
+  hackOperations HackOperation[]
+
+  @@index([ownerId], map: "idx_computers_owner")
+  @@map("computers")
+}
+
+model Defense {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  computerId  String      @map("computer_id") @db.Uuid
+  defenseType DefenseType @map("defense_type")
+  level       Int         @default(1)
+  installedAt DateTime    @default(now()) @map("installed_at") @db.Timestamptz(6)
+  computer    Computer    @relation(fields: [computerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([computerId, defenseType], map: "unique_defense_per_computer")
+  @@index([computerId], map: "idx_defenses_computer")
+  @@map("defenses")
+}
+
+model HackOperation {
+  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attackerId        String     @map("attacker_id") @db.Uuid
+  targetComputerId  String     @map("target_computer_id") @db.Uuid
+  status            HackStatus @default(PENDING)
+  hackType          HackType   @map("hack_type")
+  toolsUsed         Json       @default("[]") @map("tools_used")
+  estimatedDuration Int        @map("estimated_duration")
+  startedAt         DateTime   @default(now()) @map("started_at") @db.Timestamptz(6)
+  completionAt      DateTime   @map("completion_at") @db.Timestamptz(6)
+  resultData        Json?      @map("result_data")
+  attacker          Player     @relation(fields: [attackerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  targetComputer    Computer   @relation(fields: [targetComputerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([attackerId], map: "idx_hack_attacker")
+  @@index([targetComputerId], map: "idx_hack_target")
+  @@index([status], map: "idx_hack_status")
+  @@index([toolsUsed], map: "idx_hack_tools", type: Gin)
+  @@map("hack_operations")
+}
+
+model ProgressionUnlock {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  playerId   String     @map("player_id") @db.Uuid
+  unlockType UnlockType @map("unlock_type")
+  unlockKey  String     @map("unlock_key") @db.VarChar(50)
+  unlockedAt DateTime   @default(now()) @map("unlocked_at") @db.Timestamptz(6)
+  player     Player     @relation(fields: [playerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([playerId, unlockKey], map: "unique_player_unlock")
+  @@index([playerId], map: "idx_unlocks_player")
+  @@index([unlockKey], map: "idx_unlocks_key")
+  @@map("progression_unlocks")
+}
+
+model migrations {
+  id        Int    @id(map: "PK_8c82d7f526340ab734260ea46be") @default(autoincrement())
+  timestamp BigInt
+  name      String @db.VarChar
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model typeorm_metadata {
+  type     String  @db.VarChar
+  database String? @db.VarChar
+  schema   String? @db.VarChar
+  table    String? @db.VarChar
+  name     String? @db.VarChar
+  value    String?
+
+  @@ignore
+}
+
+enum DefenseType {
+  FIREWALL  @map("firewall")
+  ANTIVIRUS @map("antivirus")
+  HONEYPOT  @map("honeypot")
+  IDS       @map("ids")
+
+  @@map("defense_type")
+}
+
+enum HackStatus {
+  PENDING     @map("pending")
+  IN_PROGRESS @map("in_progress")
+  SUCCEEDED   @map("succeeded")
+  FAILED      @map("failed")
+  ABORTED     @map("aborted")
+
+  @@map("hack_status")
+}
+
+enum HackType {
+  STEAL_MONEY   @map("steal_money")
+  STEAL_DATA    @map("steal_data")
+  INSTALL_VIRUS @map("install_virus")
+  DDOS          @map("ddos")
+
+  @@map("hack_type")
+}
+
+enum UnlockType {
+  TOOL    @map("tool")
+  DEFENSE @map("defense")
+  UPGRADE @map("upgrade")
+  SKILL   @map("skill")
+
+  @@map("unlock_type")
+}
